@@ -190,6 +190,7 @@ const CreateCollection = ({ className = "" }) => {
   }
 
   const handleSubmit = async () => {
+
     if (window.ethereum) {
       if (
         !window.ethereum.selectedAddress ||

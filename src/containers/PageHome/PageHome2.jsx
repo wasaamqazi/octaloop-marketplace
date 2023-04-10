@@ -18,6 +18,36 @@ import SectionSliderCollections2 from "components/SectionSliderCollections2";
 import { collection, query, where, doc, getDocs } from "firebase/firestore";
 import { firestoredb } from "../../firebase";
 
+import AWS from "aws-sdk";
+import { TestContract } from "utils/interact";
+
+// AWS.config.update({
+//   accessKeyId: "AKIA3ZJLLP3X7IURQKGO",
+//   secretAccessKey: "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",
+//   region: "Asia Pacific (Singapore) ap-southeast-1",
+// });
+
+const S3_BUCKET = "octaloop-marketplace";
+const REGION = "Asia Pacific (Singapore) ap-southeast-1";
+
+AWS.config.update({
+  accessKeyId: "AKIA3ZJLLP3X7IURQKGO",
+  secretAccessKey: "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",
+});
+// const S3_BUCKET = "smashnftbucket";
+// const REGION = "Asia Pacific (Singapore) ap-southeast-1";
+
+// AWS.config.update({
+//   accessKeyId: "AKIA3ZJLLP3XSJORGEWN",
+//   secretAccessKey: "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",
+// });
+
+ const myBucket = new AWS.S3({
+  params: {
+    Bucket: S3_BUCKET,
+    region: REGION,
+  },
+});
 function PageHome() {
   //States
   const [collections, setCollections] = useState([]);
@@ -26,11 +56,9 @@ function PageHome() {
   const getCollections = async () => {
     setLoadingState(true);
 
-    const q = query(
-      collection(firestoredb, "collections")
-    );
+    const q = query(collection(firestoredb, "collections"));
     const querySnapshot = await getDocs(q);
-    await querySnapshot.forEach((doc) => {
+    await querySnapshot.forEach(doc => {
       // doc.data() is never undefined for query doc snapshots
       let tempDocData = collections;
       tempDocData.push({ id: doc.id, docData: doc.data() });
@@ -43,12 +71,98 @@ function PageHome() {
   useEffect(() => {
     getCollections();
   }, []);
+
+  // =====================================================================
+  // =====================================================================
+
+  const TestJsonObj = {
+    name: "John Doe",
+    age: 30,
+  };
+
+  const testupload = async () => {
+    try {
+      
+      myBucket.listObjectsV2(
+        {
+          Delimiter: "",
+          Prefix: "",
+        },
+        async (err, data) => {
+          if (err) {
+            return { success: false, msg: err, url: "" };
+          }
+          console.log( data.Contents);
+          await myBucket
+            .putObject({
+              Key: data.Contents.length + 1 + ".json",
+              Body: JSON.stringify(TestJsonObj),
+              ContentType: "application/json",
+            })
+            .promise()
+            .then((res) => {
+              console.log(`Upload succeeded - `, res);
+              // return {
+              //   success: true,
+              //   msg: res,
+              //   url:
+              //     "https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/" +
+              //     data.Contents.length +
+              //     1 +
+              //     ".json",
+              // };
+            })
+            .catch((err) => {
+              console.log("Upload failed:", err);
+              // return { success: false, msg: err, url: "" };
+            });
+        }
+      );
+
+        // const s3 = new AWS.S3();
+        // console.log(s3);
+        // const params = {
+        //   Bucket: "octaloop-marketplace",
+        //   Key: "Test.json",
+        //   Body: JSON.stringify(TestJsonObj),
+        //   ContentType: "application/json",
+        // };
+        // s3.upload(params, (err, data) => {
+        //   if (err) {
+        //     console.log(err);
+        //   } else {
+        //     console.log(
+        //       `File uploaded successfully. File URL: ${data.Location}`
+        //     );
+        //   }
+        // });
+      
+    } catch (error) {console.log(error);}
+  };
+
+
+  const testmint = async () => {
+    console.log("entered");
+     await TestContract();
+  }
+
+  
+  // =====================================================================
+  // =====================================================================
+
   return (
     <div className="nc-PageHome relative overflow-hidden">
       <Helmet>
         <title>Smash NFT || Next Gen Multichain Marketplace</title>
       </Helmet>
       {/* GLASSMOPHIN */}
+
+      <div>
+        <button  onClick={testupload}> upload test</button>
+<br/>
+        <button  onClick={testmint}> Test mint</button>
+
+      </div>
       <BgGlassmorphism />
 
       <div className="container relative mt-5 mb-20 sm:mb-24 lg:mt-20 lg:mb-32">

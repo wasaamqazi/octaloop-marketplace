@@ -315,7 +315,9 @@ const PageUploadItem = ({ className = "" }) => {
                 toast.success("File Uploaded Successfully!");
                 // if (!awsResponse.url) return;
                 awsURL.push(
-                  `https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/${currentKey}.json`
+                 
+                  ` https://octaloop-marketplace.s3.ap-southeast-1.amazonaws.com/${currentKey}.json`
+                  // `https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/${currentKey}.json`
                 );
 
                 if (i == bulkAmount - 1) {

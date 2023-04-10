@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect, useRef } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import BackgroundSection from "components/BackgroundSection/BackgroundSection";
 import NcImage from "shared/NcImage/NcImage";
@@ -26,7 +26,6 @@ import {
 } from "firebase/firestore";
 import { firestoredb } from "../firebase";
 import { async } from "@firebase/util";
-import CardNFT3 from "components/CardNFT3";
 
 //ABIs
 const contractABI = require("../abi/contract-abi.json");
@@ -34,7 +33,7 @@ const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 const marketABI = require("../abi/market-abi.json");
 const marketAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
 
-const PageCollection = props => {
+const PageCollection = (props) => {
   //States
   const [userNFTData, setUserNFTData] = useState([]);
   //Loading State
@@ -47,15 +46,8 @@ const PageCollection = props => {
   const [collectionName, setCollectionName] = useState("");
   const [collectionDescription, setCollectionDescription] = useState("");
   const [collectionImage, setCollectionImage] = useState("");
-  const [nftCount, setNftCount] = useState("");
-  const [mynfts, setmynfts] = useState([]);
-  const [uriarray, seturiarray] = useState([]);
-  const unidataref = useRef([]);
-
-  const printNfts = useRef([]);
-  var allnfts = [];
-  var promises = [];
-  var token;
+const [MynftData ,setMynftData]= useState([])
+const [Data ,setData]= useState([])
 
   const getCollections = async () => {
     setLoadingState(true);
@@ -84,96 +76,31 @@ const PageCollection = props => {
     setLoadingState(true);
     //Geting NFTs
     setUserNFTData([]);
-    const web3 = new Web3(window.ethereum);
-    await window.ethereum.enable();
-    var nftData = [];
     try {
-      window.contract = await new web3.eth.Contract(
-        contractABI,
-        contractAddress
-      );
-      window.contractMarket = await new web3.eth.Contract(
-        marketABI,
-        marketAddress
-      );
-      let nfts_data = [];
-      console.log(window.ethereum.selectedAddress);
-      if (
-        window.ethereum?.selectedAddress?.toString().toLowerCase() ==
-        collections?.walletAddress?.toString().toLowerCase()
-      ) {
-        // nfts_data = await window.contractMarket.methods
-        // .CheckTokenId(window.ethereum.selectedAddress)
-        //   .call();
-        const result = await window.contractMarket.methods
-          .getMyNfts(window.ethereum.selectedAddress)
-          .call();
-        console.log(result);
-        setNftCount(result.length);
-      } else {
-        console.log("nai chal raha ****");
-        let listed_nfts_data = await window.contractMarket.methods
-          .getListedNfts()
-          .call();
-        listed_nfts_data.map(l => {
-          console.log(l);
-          nfts_data.push(l.tokenId);
-        });
+     
+      // Ethereum account private key
+      // Initialize contract instance
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      window.contract = new web3.eth.Contract(marketABI, marketAddress);
+      const result = await window.contract.methods
+        .getMyListedNfts('0x27714c19ac098a0a7d914507aa3b9f7249007377')
+        .call();
+    //  console.log('resultMy', result.length);
+      for (let index = 0; index < result.length; index++) {
+        const element = result[index][0];
+       // console.log('result Data of ....', element);
+        // setData(prevState => [...prevState, element]);
+        let tempArr = Data;
+        tempArr.push(element);
+        setData(tempArr);
       }
-
-      console.log(nfts_data, "pppppppppppppppppppppp");
-      //loop for fetching tokenIDs
-
-      var uri = await window.contract.methods.tokenURI(17).call();
-
-      var token1;
-
-      for (var i = 1; i <= nftCount; i++) {
-        token1 = await window.contract.methods.tokenURI(i).call();
-        console.log(token1);
-        const response = await fetch(token1);
-        if (!response.ok) {
-          // toast.error("Something went wrong!", {
-          //   toastId: "error1",
-          // });
-          // throw new Error("Something went wrong!");
-          console.log("Something went wrong!");
-          continue;
-        }
-        const data = await response.json();
-        console.log(data);
-        //Settings data
-        const temp_data = {
-          collection: data.collection ? data.collection : "",
-          description: data.description,
-          fileSize: data.fileSize,
-          id: data.id,
-          image: data.image,
-          name: data.name,
-          price: data.price,
-          properties: data.properties,
-          royalities: data.royalities,
-          url: data.url,
-          tokenId: nfts_data[i],
-        };
-
-        nftData.push(temp_data);
-        if (temp_data.collection === props.match.params.id) {
-          setUserNFTData(existingItems => {
-            return [...existingItems, temp_data];
-          });
-        }
-        setLoadingState(false);
-      }
-      if (nfts_data.length === 0) {
-        setLoadingState(false);
-      }
+    
+      
+      console.log('calling transfer amount',Data);
+    
     } catch (err) {
-      setLoadingState(false);
-      // toast.error("Something went wrong!", {
-      //   toastId: "error1",
-      // });
-      console.log(err);
+      console.log('Error of mynft', err);
     }
   };
 
@@ -181,95 +108,10 @@ const PageCollection = props => {
   useEffect(() => {
     setCollectionId(props.match.params.id);
     // setCoverImage(props.location.state.coverImage);
-    // setCollectionImage(props.location.state.collectionImage)
+    // setCollectionImage(props.location.state.collectionImage);
 
     getCollections();
   }, []);
-
-  useEffect(() => {
-    // console.log("useeffect", mynfts );
-  }, [mynfts]);
-
-  // const setMyNftDataAfterCount = async () => {
-  //   console.log(nftCount, "-=-=-=-=-=-=-=-=-=-=-=-=-=");
-
-  //   await console.log("uriarray ", uriarray);
-
-  //   setmynfts([]);
-  //   mynfts.length = 0;
-
-  //   for (var i = 1; i <= nftCount; i++) {
-  //     await fetch(
-  //       "https://octaloop-marketplace.s3.ap-southeast-1.amazonaws.com/" +
-  //         i +
-  //         ".json"
-  //     )
-  //       .then(response => response.json())
-  //       .then(async data => {
-  //         // console.log(data);
-  //         setmynfts(prev => [...prev, data]);
-  //       })
-  //       .catch(error => {
-  //         console.log("error ===", error);
-  //       });
-  //   }
-  // };
-  // useEffect(() => {
-  //   if (nftCount > 0) {
-  //     setMyNftDataAfterCount();
-  //   }
-  // }, [nftCount]);
-
-  // ========================== ========================
-
-  useEffect(() => {
-    // console.log("useeffect", uriarray );
-  }, [uriarray]);
-
-  const settokenuris = async () => {
-    seturiarray([]);
-    setmynfts([]);
-
-
-    mynfts.length = 0;
-    for (var i = 1; i <= nftCount; i++) {
-      try {
-        token = await window.contract.methods.tokenURI(i).call();
-        // await seturiarray(prev => [...prev, token]);
-        await unidataref.current.push(token);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    console.log("uriarray [[][][][][][][]", unidataref.current)
-
-    unidataref.current.map(async dta => {
-      // console.log("---------------", dta);
-
-      await fetch(dta)
-        .then(response => response.json())
-        .then(async data => {
-          // console.log(data);
-          setmynfts(prev => [...prev, data]);
-        })
-        .catch(error => {
-          console.log("error ===", error);
-        });
-      
-    });
-
-    // await console.log("***********", mynfts, "***********");
-  };
-
-  useEffect(() => {
-    if (nftCount > 0) {
-      settokenuris();
-    }
-  }, [nftCount]);
-
-  // ==================================================
-
   //useEffect data to get nfts
   useEffect(() => {
     if (window.ethereum) {
@@ -413,25 +255,8 @@ const PageCollection = props => {
 
           {/* LOOP ITEMS */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-10  mt-8 lg:mt-10">
-            {nftCount > 0 ? (
-              // userNFTData.map((_, index) => <CardNFT key={index} nftData={_} />)
-              <>
-                {mynfts.map(data => {
-                  return (
-                    // <p>{data.name} </p>
-                    <CardNFT3
-                      id={data.id}
-                      description={data.description}
-                      image={data.image}
-                      name={data.name}
-                      price={data.price}
-                      properties={data.properties}
-                      royalities={data.royalities}
-                      url={data.url}
-                    />
-                  );
-                })}
-              </>
+            {userNFTData.length > 0 ? (
+              userNFTData.map((_, index) => <CardNFT key={index} nftData={_} />)
             ) : (
               <>No Items Found.</>
             )}

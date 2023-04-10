@@ -113,7 +113,7 @@ const PageUploadItem = ({ className = "" }) => {
       if (querySnapshot.size == 0) {
         setLoadingState(false);
       } else {
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach(doc => {
           // doc.data() is never undefined for query doc snapshots
           // console.log(doc);
 
@@ -232,7 +232,7 @@ const PageUploadItem = ({ className = "" }) => {
         return { success: false };
       }
       setLoadingState(true);
-      await Array.from(multipleFiles).forEach((file, index) => {
+      Array.from(multipleFiles).forEach((file, index) => {
         // setLoadingState(true);
 
         console.log(index + ":" + file);
@@ -243,28 +243,26 @@ const PageUploadItem = ({ className = "" }) => {
         const uploadTask = uploadBytesResumable(storageRef, element);
         uploadTask.on(
           "state_changed",
-          async (snapshot) => {
+          async snapshot => {
             const percent =
-              (await Math.round(
-                snapshot.bytesTransferred / snapshot.totalBytes
-              )) * 100;
+              Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             console.log(percent);
             // setLoadingState(false);
           },
-          (err) => {
+          err => {
             setLoadingState(false);
             console.log(err);
             return { success: false };
           },
           async () => {
-            getDownloadURL(uploadTask.snapshot.ref).then(async (url) => {
+            getDownloadURL(uploadTask.snapshot.ref).then(async url => {
               console.log(url);
               let tempLink = firebaseImageLinks;
               if (!tempLink) return;
               tempLink.push(url);
               setFirebaseImageLinks(tempLink);
               if (index === multipleFiles.length - 1) {
-                await console.log(url);
+                console.log(url);
                 uploadToAwsS3Func();
                 // uploadToPinataFunc();
                 return { success: true };
@@ -330,6 +328,7 @@ const PageUploadItem = ({ className = "" }) => {
     setImageUploaded([]);
   }
   async function uploadJSONTOAWSCustom(JSONBody, callback) {
+    console.log(";;;;;;;;;;;;;;;;   mint ;;;;;;;;;;;;;;;;;;;");
     console.log(JSONBody);
     if (!JSONBody) {
       return callback({ success: false, msg: "JSON is empty", url: "" });
@@ -342,6 +341,7 @@ const PageUploadItem = ({ className = "" }) => {
         async (err, data) => {
           if (err) {
             return callback({ success: false, msg: err, url: "" });
+            // return { success: false, msg: err, url: "" };
           }
           console.log(data.Contents.length);
           JSONBody.id = data.Contents.length;
@@ -353,7 +353,7 @@ const PageUploadItem = ({ className = "" }) => {
               ContentType: "application/json",
             })
             .promise()
-            .then(async (res) => {
+            .then(async res => {
               console.log(`Upload succeeded - `, res);
               //on error
 
@@ -361,7 +361,8 @@ const PageUploadItem = ({ className = "" }) => {
               toast.success("File Uploaded Successfully!");
               // if (!awsResponse.url) return;
               let awsURL =
-                "https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/" +
+                "https://octaloop-marketplace.s3.ap-southeast-1.amazonaws.com/" +
+                // "https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/" +
                 (data.Contents.length + 1) +
                 ".json";
               console.log(awsURL);
@@ -383,7 +384,7 @@ const PageUploadItem = ({ className = "" }) => {
                 url: awsURL,
               });
             })
-            .catch((err) => {
+            .catch(err => {
               setLoadingState(false);
               toast.error("Error! Something went wrong");
               return callback({
@@ -415,9 +416,9 @@ const PageUploadItem = ({ className = "" }) => {
     };
 
     //Saving listed NFT to pinata
-    const awsResponse = await uploadJSONTOAWSCustom(jsonData, (result) => {
+    const awsResponse = await uploadJSONTOAWSCustom(jsonData, result => {
       // console.log("AWS Response:", awsResponse);
-      console.log("AWS Response:", result);
+      console.log("AWS Response: -----------", result);
 
       //on error
       // if (!awsResponse) {
@@ -510,8 +511,7 @@ const PageUploadItem = ({ className = "" }) => {
   return (
     <div
       className={`nc-PageUploadItem ${className}`}
-      data-nc-id="PageUploadItem"
-    >
+      data-nc-id="PageUploadItem">
       {" "}
       <Helmet>
         <title>Create Item || NFT React Template</title>
@@ -566,27 +566,24 @@ const PageUploadItem = ({ className = "" }) => {
                         stroke="currentColor"
                         fill="none"
                         viewBox="0 0 48 48"
-                        aria-hidden="true"
-                      >
+                        aria-hidden="true">
                         <path
                           d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
                           strokeWidth="2"
                           strokeLinecap="round"
-                          strokeLinejoin="round"
-                        ></path>
+                          strokeLinejoin="round"></path>
                       </svg>
                       <div className="flex text-sm text-neutral-6000 dark:text-neutral-300">
                         <label
                           htmlFor="file-upload"
-                          className="relative cursor-pointer  rounded-md font-medium text-primary-6000 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500"
-                        >
+                          className="relative cursor-pointer  rounded-md font-medium text-primary-6000 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
                           <span>Upload a file</span>
                           <input
                             id="file-upload"
                             name="file-upload"
                             type="file"
                             className="sr-only"
-                            onChange={(e) => {
+                            onChange={e => {
                               const fileList = e.target.files;
                               if (fileList != null) setMultipleFiles(fileList);
                               if (!fileList) return;
@@ -652,7 +649,7 @@ const PageUploadItem = ({ className = "" }) => {
                 <Input
                   value={itemName}
                   placeholder="Item Name"
-                  onChange={(e) => {
+                  onChange={e => {
                     setItemName(e.target.value);
                   }}
                 />
@@ -668,8 +665,8 @@ const PageUploadItem = ({ className = "" }) => {
                     className="!rounded-l-none"
                     pattern="^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$"
                     placeholder="Price"
-                    onChange={(e) => {
-                      setPrice((p) =>
+                    onChange={e => {
+                      setPrice(p =>
                         e.target.validity.valid ? e.target.value : p
                       );
                     }}
@@ -679,8 +676,7 @@ const PageUploadItem = ({ className = "" }) => {
               {/* ---- */}
               <FormItem
                 label="External link"
-                desc="Smash NFT will include a link to this URL on this item's detail page, so that users can click to learn more about it. You are welcome to link to your own webpage with more details."
-              >
+                desc="Smash NFT will include a link to this URL on this item's detail page, so that users can click to learn more about it. You are welcome to link to your own webpage with more details.">
                 <div className="flex">
                   <span className="inline-flex items-center px-3 rounded-l-2xl border border-r-0 border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 text-sm">
                     https://
@@ -689,7 +685,7 @@ const PageUploadItem = ({ className = "" }) => {
                     value={externalLink}
                     className="!rounded-l-none"
                     placeholder="abc.com"
-                    onChange={(e) => {
+                    onChange={e => {
                       setExternalLink(e.target.value);
                     }}
                   />
@@ -706,14 +702,13 @@ const PageUploadItem = ({ className = "" }) => {
                     <span className="text-green-500">Markdown</span> syntax is
                     supported.
                   </div>
-                }
-              >
+                }>
                 <Textarea
                   value={description}
                   rows={6}
                   className="mt-1.5"
                   placeholder="..."
-                  onChange={(e) => {
+                  onChange={e => {
                     console.log(selected);
                     setDescription(e.target.value);
                   }}
@@ -752,8 +747,7 @@ const PageUploadItem = ({ className = "" }) => {
                       : "hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   }
                     relative flex-shrink-0 w-44 rounded-xl border border-neutral-200 dark:border-neutral-700 px-6 py-5 cursor-pointer flex focus:outline-none `
-                          }
-                        >
+                          }>
                           {({ active, checked }) => (
                             <>
                               <div className="flex items-center justify-between w-full">
@@ -762,8 +756,7 @@ const PageUploadItem = ({ className = "" }) => {
                                     <div className="flex items-center justify-between">
                                       <RadioGroup.Description
                                         as="div"
-                                        className={"rounded-full w-16"}
-                                      >
+                                        className={"rounded-full w-16"}>
                                         <NcImage
                                           containerClassName="aspect-w-1 aspect-h-1 rounded-full overflow-hidden"
                                           src={
@@ -783,8 +776,7 @@ const PageUploadItem = ({ className = "" }) => {
                                       as="p"
                                       className={`font-semibold mt-3  ${
                                         checked ? "text-white" : ""
-                                      }`}
-                                    >
+                                      }`}>
                                       {collec.docData
                                         ? collec.docData.collectionName
                                         : ""}
@@ -816,7 +808,7 @@ const PageUploadItem = ({ className = "" }) => {
                   <Input
                     value={royalities}
                     placeholder="20%"
-                    onChange={(e) => {
+                    onChange={e => {
                       setRoyalities(e.target.value);
                     }}
                   />
@@ -834,7 +826,7 @@ const PageUploadItem = ({ className = "" }) => {
                   <Input
                     value={properties}
                     placeholder="Propertie"
-                    onChange={(e) => {
+                    onChange={e => {
                       setProperties(e.target.value);
                     }}
                   />
@@ -861,8 +853,7 @@ const PageUploadItem = ({ className = "" }) => {
               <div className="pt-2 flex flex-col sm:flex-row space-y-3 sm:space-y-0 space-x-0 sm:space-x-3 ">
                 <ButtonPrimary
                   className="flex-1"
-                  onClick={uploadItemButtonClicked}
-                >
+                  onClick={uploadItemButtonClicked}>
                   Upload item
                 </ButtonPrimary>
                 <ButtonSecondary className="flex-1" onClick={openModalEdit}>

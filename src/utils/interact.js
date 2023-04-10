@@ -11,7 +11,29 @@ const marketPlaceAbi = require("../abi/market-abi.json");
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 const marketPlaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
 
+export const TestContract = async () => {
+
+  try {
+    window.contract = await new web3.eth.Contract(marketPlaceAbi, marketPlaceAddress);
+    // console.log(window.contract.methods.owner().call());
+
+    window.contract.methods._nftCount().call()
+      .then(data => {
+        console.log(data); // access the resolved value of the promise
+        // other code logic here
+      })
+      .catch(error => {
+        console.error(error); // handle any errors that may occur
+      });
+
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const mintNFT = async (url, price) => {
+
   //error handling
   if (url.trim() === "") {
     return {
@@ -19,26 +41,69 @@ export const mintNFT = async (url, price) => {
       status: "❗Please make sure all fields are completed before minting.",
     };
   }
-  var weiValue = web3.utils.toWei(price, "ether");
+  // var weiValue = web3.utils.toWei(price, "ether");
+
+  // try {
+  //   window.contract = await new web3.eth.Contract(contractABI, contractAddress);
+  //   //set up your Ethereum transaction
+  //   const transactionParameters = {
+  //     to: contractAddress, // Required except during contract publications.
+  //     from: window.ethereum.selectedAddress, // must match user's active address.
+  //     value: web3.utils.toHex(weiValue),
+  //     data: window.contract.methods.SingleMintNFTs(url).encodeABI(), //make call to buy box
+  //   };
+  //   //sign the transaction via Metamask
+  //   const txHash = await window.ethereum.request({
+  //     method: "eth_sendTransaction",
+  //     params: [transactionParameters],
+  //   });
+  // } catch (err) {
+  //   console.log(err);
+  // }
 
   try {
-    window.contract = await new web3.eth.Contract(contractABI, contractAddress);
-    //set up your Ethereum transaction
+ 
+    window.contract = await new web3.eth.Contract(marketPlaceAbi, marketPlaceAddress);
+    // console.log(window.contract.methods.owner().call());
+
+    // window.contract.methods.SingleMinting(url).call()
     const transactionParameters = {
-      to: contractAddress, // Required except during contract publications.
+      to: marketPlaceAddress, // Required except during contract publications.
       from: window.ethereum.selectedAddress, // must match user's active address.
-      value: web3.utils.toHex(weiValue),
-      data: window.contract.methods.SingleMintNFTs(url).encodeABI(), //make call to buy box
+      // value: web3.utils.toHex(weiValue),
+      data: window.contract.methods.SingleMinting(url).encodeABI(), //make call to buy box
     };
     //sign the transaction via Metamask
     const txHash = await window.ethereum.request({
       method: "eth_sendTransaction",
       params: [transactionParameters],
     });
+    console.log("minted =========", txHash)
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const TokenURI = async (tokenID) => {
+  try {
+    window.contract = await new web3.eth.Contract(marketPlaceAbi, marketPlaceAddress);
+    // console.log(window.contract.methods.owner().call());
+
+    window.contract.methods.tokenURl(tokenID).call()
+      .then(data => {
+        console.log(data, "**************************************");
+      })
+      .catch(error => {
+        console.error(error); // handle any errors that may occur
+      });
+
+
   } catch (err) {
     console.log(err);
   }
-};
+}
+
 export const bulkMintNFT = async (url, price, amount) => {
   //error handling
   for (var i = 0; i < url.length; i++) {

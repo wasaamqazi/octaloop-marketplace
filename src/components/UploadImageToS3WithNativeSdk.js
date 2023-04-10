@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import AWS from "aws-sdk";
 
-const S3_BUCKET = "smashnftbucket";
+// const S3_BUCKET = "smashnftbucket";
+const S3_BUCKET = "octaloop-marketplace";
 const REGION = "Asia Pacific (Singapore) ap-southeast-1";
 
 AWS.config.update({
-  accessKeyId: "AKIA3ZJLLP3XSJORGEWN",
-  secretAccessKey: "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",
+  // accessKeyId: "AKIA3ZJLLP3XSJORGEWN",
+  // secretAccessKey: "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",
+  accessKeyId: "AKIA3ZJLLP3X7IURQKGO",
+  secretAccessKey: "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",
 });
 
 export const myBucket = new AWS.S3({
@@ -68,6 +71,37 @@ const UploadImageToS3WithNativeSdk = () => {
       (err, data) => {
         if (err) throw err;
       }
+
+      // async (err, data) => {
+      //   if (err) {
+      //     return { success: false, msg: err, url: "" };
+      //   }
+      //   console.log( data.Contents);
+      //   await myBucket
+      //     .putObject({
+      //       Key: data.Contents.length + 1 + ".json",
+      //       Body: JSON.stringify(users),
+      //       ContentType: "application/json",
+      //     })
+      //     .promise()
+      //     .then((res) => {
+      //       console.log(res);
+      //       // return {
+      //       //   success: true,
+      //       //   msg: res,
+      //       //   url:
+      //       //     "https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/" +
+      //       //     data.Contents.length +
+      //       //     1 +
+      //       //     ".json",
+      //       // };
+      //     })
+      //     .catch((err) => {
+      //       console.log("Upload failed:", err);
+      //       // return { success: false, msg: err, url: "" };
+      //     });
+      //   }
+
     );
 
     // myBucket.getObject(
@@ -99,6 +133,9 @@ const UploadImageToS3WithNativeSdk = () => {
     //   .send((err) => {
     //     if (err) console.log(err);
     //   });
+
+    
+
   };
   return (
     <div>
@@ -142,7 +179,9 @@ export const uploadJSONToAWS = async (JSONBody) => {
               success: true,
               msg: res,
               url:
-                "https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/" +
+             
+                " https://octaloop-marketplace.s3.ap-southeast-1.amazonaws.com/" +
+                // "https://smashnftbucket.s3.ap-southeast-1.amazonaws.com/" +
                 data.Contents.length +
                 1 +
                 ".json",
